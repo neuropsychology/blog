@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.53" />
+
+
+<title>Formatted Correlation with Effect Size - Neuropsychology Blog</title>
+<meta property="og:title" content="Formatted Correlation with Effect Size - Neuropsychology Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo/logo.PNG"
+         width="1198"
+         height="1198"
+         alt="Neuropsychology Blog">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/neuropsychology/blog">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Dom_Makowski">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">3 min read</span>
+    
+
+    <h1 class="article-title">Formatted Correlation with Effect Size</h1>
+
+    
+    <span class="article-date">2018/06/28</span>
+    
+
+    <div class="article-content">
+      
+
+<ul>
+<li><a href="#do-a-correlation">Do a correlation</a></li>
+<li><a href="#apa-formatted-output">APA formatted output</a></li>
+<li><a href="#dataframe-of-values">Dataframe of Values</a></li>
+<li><a href="#bayesian-correlation">Bayesian Correlation</a></li>
+<li><a href="#contribute">Contribute</a></li>
+<li><a href="#credits">Credits</a></li>
+<li><a href="#previous-blogposts">Previous blogposts</a></li>
+</ul>
+
+<p>One of the most time-consuming part of data analysis in psychology is the copy-pasting of specific values of some R output to a manuscript or a report. This task is frustrating, prone to errors, and increase de variability of statistical reporting. At the sime time, standardizing practices of what and how to report is crucial for reproducibility and clarity. <strong>The <a href="https://github.com/neuropsychology/psycho.R">psycho</a> package was designed specifically to do this job</strong>, at first for complex <a href="https://cran.r-project.org/web/packages/psycho/vignettes/bayesian.html">Bayesian mixed models</a>, but is now also compatible with basic methods, such as <strong>correlation</strong>.</p>
+
+<h1 id="do-a-correlation">Do a correlation</h1>
+
+<pre><code class="language-r">df &lt;- iris  # Load the traditional iris dataset into an object called df (for dataframe)
+cor_results &lt;- cor.test(df$Sepal.Length, df$Petal.Length)  # Compute a correlation and store its result
+</code></pre>
+
+<h1 id="apa-formatted-output">APA formatted output</h1>
+
+<pre><code class="language-r"># devtools::install_github(&quot;neuropsychology/psycho.R&quot;)  # Install the latest psycho version
+
+library(psycho)  # Load the psycho package
+
+psycho::analyze(cor_results)  # Run the analyze function on the correlation
+</code></pre>
+
+<pre><code>The Pearson's product-moment correlation between df$Sepal.Length and df$Petal.Length is significantly large and positive (r(148) = 0.87, 95% CI [0.83, 0.91], p &lt; .001).
+</code></pre>
+
+<p>The formatted output includes the <strong>direction</strong>, <strong>effect size</strong> (interpreted by default with <strong><a href="https://github.com/neuropsychology/psycho.R/blob/master/R/interpret_r.R#L142">Cohen&rsquo;s (1988)</a></strong> rules of thumb) and <strong>confidence intervals</strong>. Now, you can just copy and paste this line into your report and focus on more important things than formatting.</p>
+
+<h1 id="dataframe-of-values">Dataframe of Values</h1>
+
+<p>It is also possible to have all the values stored in a dataframe by running a <strong>summary</strong> on the analyzed object.</p>
+
+<pre><code class="language-r">results &lt;- analyze(cor_results)
+summary(results)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="right">effect</th>
+<th align="right">statistic</th>
+<th align="right">df</th>
+<th align="right">p</th>
+<th align="right">CI_lower</th>
+<th align="right">CI_higher</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="right">0.872</td>
+<td align="right">21.646</td>
+<td align="right">148</td>
+<td align="right">0</td>
+<td align="right">0.827</td>
+<td align="right">0.906</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="bayesian-correlation">Bayesian Correlation</h1>
+
+<p>Nevertheless, we recommand doing a <strong>Bayesian correlation</strong>, which is even <a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">easier and quicker to do</a>!</p>
+
+<h1 id="contribute">Contribute</h1>
+
+<p>Of course, these reporting standards are bound to change, depending on new expert recommandations or official guidelines. <strong>The goal of this package is to flexibly accompany new changes and good practices evolution</strong>. Therefore, if you have any advices, opinions or such, we encourage you to either let us know by opening an <a href="https://github.com/neuropsychology/psycho.R/issues">issue</a> or, <em>even better</em>, try to implement them yourself by <a href="https://github.com/neuropsychology/psycho.R/blob/master/.github/CONTRIBUTING.md">contributing</a> to the code.</p>
+
+<h1 id="credits">Credits</h1>
+
+<p>This package helped you? Don&rsquo;t forget to cite the various packages you used :)</p>
+
+<p>You can cite <code>psycho</code> as follows:</p>
+
+<ul>
+<li>Makowski, (2018). <em>The psycho Package: An Efficient and Publishing-Oriented Workflow for Psychological Science</em>. Journal of Open Source Software, 3(22), 470. <a href="https://doi.org/10.21105/joss.00470">https://doi.org/10.21105/joss.00470</a></li>
+</ul>
+
+<h1 id="previous-blogposts">Previous blogposts</h1>
+
+<ul>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/25/refdata.html">Extracting a Reference Grid of your Data for Machine Learning Models Visualization</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">Copy/paste t-tests Directly to Manuscripts</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">Easy APA Formatted Bayesian Correlation</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/03/plot_bayesian_model.html">Fancy Plot (with Posterior Samples) for Bayesian Regressions</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/24/n_factors.html">How Many Factors to Retain in Factor Analysis</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html">Beautiful and Powerful Correlation Tables</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/10/interpret_mixed_models.html">Format and Interpret Linear Mixed Models</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">How to do Repeated Measures ANOVAs</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/standardize.html">Standardize (Z-score) a dataframe</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/SDT.html">Compute Signal Detection Theory Indices</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/21/installingR.html">Installing R, R Studio and psycho</a></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+		<li>
+            <a href="https://dominiquemakowski.github.io/" type="footer-links-kudos" target="_blank">© Dominique Makowski</a>
+          </li>
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="../../../../js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

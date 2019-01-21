@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.53" />
+
+
+<title>How to do Repeated Measures ANOVAs in R - Neuropsychology Blog</title>
+<meta property="og:title" content="How to do Repeated Measures ANOVAs in R - Neuropsychology Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo/logo.PNG"
+         width="1198"
+         height="1198"
+         alt="Neuropsychology Blog">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/neuropsychology/blog">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Dom_Makowski">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">How to do Repeated Measures ANOVAs in R</h1>
+
+    
+    <span class="article-date">2018/05/01</span>
+    
+
+    <div class="article-content">
+      
+
+<ul>
+<li><a href="#dont-do-it">Don&rsquo;t do it</a></li>
+<li><a href="#the-emotion-dataset">The Emotion Dataset</a></li>
+<li><a href="#the-effect-of-emotion">The effect of Emotion</a></li>
+<li><a href="#post-hoc-contrast-analysis">Post-hoc / Contrast Analysis</a></li>
+<li><a href="#interaction">Interaction</a></li>
+<li><a href="#note">Note</a></li>
+<li><a href="#credits">Credits</a></li>
+</ul>
+
+<h1 id="don-t-do-it">Don&rsquo;t do it</h1>
+
+<p><strong>Ha! Got ya!</strong> Trying to run some <em>old school</em> ANOVAs <em>hum</em>? <strong>I&rsquo;ll show you even better!</strong></p>
+
+<p>There is now a tremendous amount of data showing the inadequacy of ANOVAs as a statistical procedure (<a href="http://journals.sagepub.com/doi/abs/10.3102/10769986012001087">Camilli, 1987</a>; <a href="https://www.tandfonline.com/doi/abs/10.1080/00949657808810247">Levy, 1978</a>; <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1469-8986.1987.tb00324.x">Vasey, 1987</a>; <a href="https://link.springer.com/article/10.1007/s00180-009-0162-z">Chang, 2009</a>). Instead, many papers suggest moving toward the mixed-modelling framework (<a href="https://www.physiology.org/doi/abs/10.1152/advan.00042.2003">Kristensen, 2004</a>; <a href="https://www.sciencedirect.com/science/article/pii/S0749596X07001337">Jaeger, 2008</a>), which was shown to be more flexible, accurate, powerful and suited for psychological data.</p>
+
+<p>Using this framework, we will see how we can very simply answer our questions with R and the <a href="https://github.com/neuropsychology/psycho.R">psycho</a> package.</p>
+
+<h1 id="the-emotion-dataset">The Emotion Dataset</h1>
+
+<p>Let&rsquo;s take the example dataset included in the <code>psycho</code> package.</p>
+
+<pre><code class="language-r">library(psycho)
+library(tidyverse)
+
+df &lt;- psycho::emotion %&gt;% 
+  select(Participant_ID, 
+         Participant_Sex, 
+         Emotion_Condition, 
+         Subjective_Valence,
+         Recall)
+
+summary(df)
+</code></pre>
+
+<pre><code> Participant_ID Participant_Sex Emotion_Condition Subjective_Valence
+ 10S    : 48    Female:720      Negative:456      Min.   :-100.000  
+ 11S    : 48    Male  :192      Neutral :456      1st Qu.: -65.104  
+ 12S    : 48                                      Median :  -2.604  
+ 13S    : 48                                      Mean   : -18.900  
+ 14S    : 48                                      3rd Qu.:   7.000  
+ 15S    : 48                                      Max.   : 100.000  
+ (Other):624                                                        
+   Recall       
+ Mode :logical  
+ FALSE:600      
+ TRUE :312      
+</code></pre>
+
+<p>Our dataframe (called <code>df</code>) contains data from several participants, exposed to neutral and negative pictures (the <code>Emotion_Condition</code> column). Each row corresponds to a single trial. As there were 48 trials per participants, there are 48 rows by participant. During each trial, the participant had to rate its emotional valence (<code>Subjective_Valence</code>: positive - negative) experienced during the picture presentation. Moreover, 20min after this emotional rating task, the participant was asked to freely recall all the pictures he remembered.</p>
+
+<p>Our dataframe contains, for each trial, 5 variables: the <strong>name of the participant</strong> (<code>Participant_ID</code>), its <strong>sex</strong> (<code>Participant_Sex</code>), the <strong>emotion condition</strong> (<code>Emotion_Condition</code>), the <strong>valence rating</strong> (<code>Subjective_Valence</code>) and whether the participant <strong>recalled</strong> the picture (<code>Recall</code>).</p>
+
+<h1 id="the-effect-of-emotion">The effect of Emotion</h1>
+
+<p>Does the emotion condition modulate the subjective valence? How to answer?</p>
+
+<p><strong>Whith a repeated measures ANOVA of course!</strong></p>
+
+<p>Let&rsquo;s run it:</p>
+
+<pre><code class="language-r">summary(aov(Subjective_Valence ~ Emotion_Condition + Error(Participant_ID/Emotion_Condition), data=df))
+</code></pre>
+
+<pre><code>Error: Participant_ID
+          Df Sum Sq Mean Sq F value Pr(&gt;F)
+Residuals 18 115474    6415               
+
+Error: Participant_ID:Emotion_Condition
+                  Df  Sum Sq Mean Sq F value   Pr(&gt;F)    
+Emotion_Condition  1 1278417 1278417   245.9 6.11e-12 ***
+Residuals         18   93573    5198                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Error: Within
+           Df Sum Sq Mean Sq F value Pr(&gt;F)
+Residuals 874 935646    1070               
+</code></pre>
+
+<p>Wow, we found that there is a significant effect of the emotional condition on valence ratings. <em>We might have Science material here.</em></p>
+
+<p>As you know, an ANOVA is pretty much a <em>condensed</em> linear model where the predictors are factors. Therefore, we can run an ANOVA on a linear mixed model (which includes the &ldquo;error&rdquo; term, or <em>random effect</em>).</p>
+
+<pre><code class="language-r">library(lmerTest)
+fit &lt;- lmer(Subjective_Valence ~ Emotion_Condition + (1|Participant_ID), data=df)
+anova(fit)
+</code></pre>
+
+<pre><code>Type III Analysis of Variance Table with Satterthwaite's method
+                   Sum Sq Mean Sq NumDF DenDF F value    Pr(&gt;F)    
+Emotion_Condition 1278417 1278417     1   892    1108 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+</code></pre>
+
+<p>As you can see, the results are, for the important bits (the sum of squares, mean square and <em>p</em> value), very close to those of the <em>traditional</em> approach.</p>
+
+<p>Note that the <code>psycho</code> package, through the <code>analyze</code> function, also allows to display the interpretation of the underlying model itself with the following:</p>
+
+<pre><code class="language-r">results &lt;- analyze(fit)
+print(results)
+</code></pre>
+
+<pre><code>The overall model predicting Subjective_Valence (formula = Subjective_Valence ~ Emotion_Condition + (1 | Participant_ID)) successfully converged and explained 56.73% of the variance of the endogen (the conditional R2). The variance explained by the fixed effects was of 52.62% (the marginal R2) and the one explained by the random effects of 4.11%. The model's intercept is at -56.34 (SE = 2.88, 95% CI [-62.07, -50.61]). Within this model:
+   - The effect of Emotion_ConditionNeutral is  significant (beta = 74.88, SE = 2.25, 95% CI [70.47, 79.29], t(892.00) = 33.29, p &lt; .001***) and can be considered as medium (std. beta = 0.73, std. SE = 0.022).
+</code></pre>
+
+<h1 id="post-hoc-contrast-analysis">Post-hoc / Contrast Analysis</h1>
+
+<p>Then, we wou&rsquo;d like to see how the levels are different. To do this, we have to run a &ldquo;contrast&rdquo; analysis, comparing the estimated means of each level.</p>
+
+<pre><code class="language-r"># We have to provide the model (here called fit and the factors we want to contrast
+results &lt;- get_contrasts(fit, &quot;Emotion_Condition&quot;)
+print(results$contrasts)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">Contrast</th>
+<th align="right">Difference</th>
+<th align="right">SE</th>
+<th align="right">df</th>
+<th align="right">t.ratio</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Negative - Neutral</td>
+<td align="right">-74.88</td>
+<td align="right">2.25</td>
+<td align="right">892</td>
+<td align="right">-33.29</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+
+<p>It appears that the negative condition yields a significantly lower valence (<em>i.e.</em>, more negative) than the neutral (-74.88 points of difference). At this point, we usually also want to know the means of each conditions. However, we often do it by directly computing the means and SDs of our observed data. But that&rsquo;s not the cleanest way, as our data might be unbalanced or biased.</p>
+
+<p>The best way to do it is to estimate means based on the fitted model (marginal means). Those were automatically computed when running the <code>get_contrasts</code> function. We just have to extract them.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Emotion_Condition</th>
+<th align="right">Mean</th>
+<th align="right">SE</th>
+<th align="right">df</th>
+<th align="right">CI_lower</th>
+<th align="right">CI_higher</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Negative</td>
+<td align="right">-56.34</td>
+<td align="right">2.88</td>
+<td align="right">25.04</td>
+<td align="right">-62.27</td>
+<td align="right">-50.41</td>
+</tr>
+
+<tr>
+<td align="left">Neutral</td>
+<td align="right">18.54</td>
+<td align="right">2.88</td>
+<td align="right">25.04</td>
+<td align="right">12.61</td>
+<td align="right">24.47</td>
+</tr>
+</tbody>
+</table>
+
+<p>Finally, we can plot these means:</p>
+
+<pre><code class="language-r">library(ggplot2)
+
+ggplot(results$means, aes(x=Emotion_Condition, y=Mean, group=1)) +
+  geom_line() +
+  geom_pointrange(aes(ymin=CI_lower, ymax=CI_higher)) +
+  ylab(&quot;Subjective Valence&quot;) +
+  xlab(&quot;Emotion Condition&quot;) +
+  theme_bw()
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-05-01-repeated_measure_anovas_files/figure-markdown_github/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /></p>
+
+<h1 id="interaction">Interaction</h1>
+
+<p>Let&rsquo;s repeat the previous steps with adding the participant&rsquo;s <strong>sex</strong> as a predictor.</p>
+
+<pre><code class="language-r">fit &lt;- lmer(Subjective_Valence ~ Emotion_Condition * Participant_Sex + (1|Participant_ID), data=emotion)
+anova(fit)
+</code></pre>
+
+<pre><code>Type III Analysis of Variance Table with Satterthwaite's method
+                                  Sum Sq Mean Sq NumDF DenDF  F value
+Emotion_Condition                 703963  703963     1   891 621.8068
+Participant_Sex                      520     520     1    17   0.4593
+Emotion_Condition:Participant_Sex  20496   20496     1   891  18.1041
+                                     Pr(&gt;F)    
+Emotion_Condition                 &lt; 2.2e-16 ***
+Participant_Sex                      0.5071    
+Emotion_Condition:Participant_Sex 2.313e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+</code></pre>
+
+<p>It seems that there is a significant main effect of the emotion condition, as well as an interaction with the participants&rsquo; sex. Let&rsquo;s plot the estimated means.</p>
+
+<pre><code class="language-r">estimated_means &lt;- get_means(fit, &quot;Emotion_Condition * Participant_Sex&quot;)
+estimated_means
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">Emotion_Condition</th>
+<th align="left">Participant_Sex</th>
+<th align="right">Mean</th>
+<th align="right">SE</th>
+<th align="right">df</th>
+<th align="right">CI_lower</th>
+<th align="right">CI_higher</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Negative</td>
+<td align="left">Female</td>
+<td align="right">-59.73</td>
+<td align="right">3.28</td>
+<td align="right">23.3</td>
+<td align="right">-66.51</td>
+<td align="right">-52.95</td>
+</tr>
+
+<tr>
+<td align="left">Neutral</td>
+<td align="left">Female</td>
+<td align="right">20.05</td>
+<td align="right">3.28</td>
+<td align="right">23.3</td>
+<td align="right">13.27</td>
+<td align="right">26.83</td>
+</tr>
+
+<tr>
+<td align="left">Negative</td>
+<td align="left">Male</td>
+<td align="right">-43.63</td>
+<td align="right">6.35</td>
+<td align="right">23.3</td>
+<td align="right">-56.76</td>
+<td align="right">-30.50</td>
+</tr>
+
+<tr>
+<td align="left">Neutral</td>
+<td align="left">Male</td>
+<td align="right">12.89</td>
+<td align="right">6.35</td>
+<td align="right">23.3</td>
+<td align="right">-0.24</td>
+<td align="right">26.02</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code class="language-r">ggplot(estimated_means, aes(x=Emotion_Condition, y=Mean, color=Participant_Sex, group=Participant_Sex)) +
+  geom_line(position = position_dodge(.3)) +
+  geom_pointrange(aes(ymin=CI_lower, ymax=CI_higher), 
+                  position = position_dodge(.3)) +
+  ylab(&quot;Subjective Valence&quot;) +
+  xlab(&quot;Emotion Condition&quot;) +
+  theme_bw()
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-05-01-repeated_measure_anovas_files/figure-markdown_github/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /></p>
+
+<p>Let&rsquo;s investigate the contrasts:</p>
+
+<pre><code class="language-r">get_contrasts(fit, &quot;Emotion_Condition * Participant_Sex&quot;)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">Contrast</th>
+<th align="right">Difference</th>
+<th align="right">SE</th>
+<th align="right">df</th>
+<th align="right">t.ratio</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Negative,Female - Neutral,Female</td>
+<td align="right">-79.78</td>
+<td align="right">2.51</td>
+<td align="right">891.0</td>
+<td align="right">-31.81</td>
+<td align="right">0.00</td>
+</tr>
+
+<tr>
+<td align="left">Negative,Female - Negative,Male</td>
+<td align="right">-16.10</td>
+<td align="right">7.15</td>
+<td align="right">23.3</td>
+<td align="right">-2.25</td>
+<td align="right">0.14</td>
+</tr>
+
+<tr>
+<td align="left">Negative,Female - Neutral,Male</td>
+<td align="right">-72.62</td>
+<td align="right">7.15</td>
+<td align="right">23.3</td>
+<td align="right">-10.16</td>
+<td align="right">0.00</td>
+</tr>
+
+<tr>
+<td align="left">Neutral,Female - Negative,Male</td>
+<td align="right">63.67</td>
+<td align="right">7.15</td>
+<td align="right">23.3</td>
+<td align="right">8.91</td>
+<td align="right">0.00</td>
+</tr>
+
+<tr>
+<td align="left">Neutral,Female - Neutral,Male</td>
+<td align="right">7.15</td>
+<td align="right">7.15</td>
+<td align="right">23.3</td>
+<td align="right">1.00</td>
+<td align="right">0.75</td>
+</tr>
+
+<tr>
+<td align="left">Negative,Male - Neutral,Male</td>
+<td align="right">-56.52</td>
+<td align="right">4.86</td>
+<td align="right">891.0</td>
+<td align="right">-11.64</td>
+<td align="right">0.00</td>
+</tr>
+</tbody>
+</table>
+
+<p>It appears that the differences between men and women is not significant. However, by default, <code>get_contrasts</code> uses the Tukey method for p value adjustment. We can, with an exploratory mindset, <strong>turn off the p value correction</strong> (or choose other methods such as <em>bonferonni</em>, <em>fdr</em> and such).</p>
+
+<pre><code class="language-r">get_contrasts(fit, &quot;Emotion_Condition * Participant_Sex&quot;, adjust = &quot;none&quot;)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">Contrast</th>
+<th align="right">Difference</th>
+<th align="right">SE</th>
+<th align="right">df</th>
+<th align="right">t.ratio</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Negative,Female - Neutral,Female</td>
+<td align="right">-79.78</td>
+<td align="right">2.51</td>
+<td align="right">891.0</td>
+<td align="right">-31.81</td>
+<td align="right">0.00</td>
+</tr>
+
+<tr>
+<td align="left">Negative,Female - Negative,Male</td>
+<td align="right">-16.10</td>
+<td align="right">7.15</td>
+<td align="right">23.3</td>
+<td align="right">-2.25</td>
+<td align="right">0.03</td>
+</tr>
+
+<tr>
+<td align="left">Negative,Female - Neutral,Male</td>
+<td align="right">-72.62</td>
+<td align="right">7.15</td>
+<td align="right">23.3</td>
+<td align="right">-10.16</td>
+<td align="right">0.00</td>
+</tr>
+
+<tr>
+<td align="left">Neutral,Female - Negative,Male</td>
+<td align="right">63.67</td>
+<td align="right">7.15</td>
+<td align="right">23.3</td>
+<td align="right">8.91</td>
+<td align="right">0.00</td>
+</tr>
+
+<tr>
+<td align="left">Neutral,Female - Neutral,Male</td>
+<td align="right">7.15</td>
+<td align="right">7.15</td>
+<td align="right">23.3</td>
+<td align="right">1.00</td>
+<td align="right">0.33</td>
+</tr>
+
+<tr>
+<td align="left">Negative,Male - Neutral,Male</td>
+<td align="right">-56.52</td>
+<td align="right">4.86</td>
+<td align="right">891.0</td>
+<td align="right">-11.64</td>
+<td align="right">0.00</td>
+</tr>
+</tbody>
+</table>
+
+<p>Without correcting for multiple comparisons, we observe that men rate the negative pictures as significantly less negative than women.</p>
+
+<h1 id="note">Note</h1>
+
+<p><strong>This analysis is even simpler in the Bayesian framework. See <a href="https://CRAN.R-project.org/package=psycho/vignettes/bayesian.html">this</a> tutorial.</strong></p>
+
+<h1 id="credits">Credits</h1>
+
+<p>This package helped you? Don&rsquo;t forget to cite the various packages you used :)</p>
+
+<p>You can cite <code>psycho</code> as follows:</p>
+
+<ul>
+<li>Makowski, (2018). <em>The psycho Package: an Efficient and Publishing-Oriented Workflow for Psychological Science</em>. Journal of Open Source Software, 3(22), 470. <a href="https://doi.org/10.21105/joss.00470">https://doi.org/10.21105/joss.00470</a></li>
+</ul>
+
+<h1 id="previous-blogposts">Previous blogposts</h1>
+
+<ul>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">Copy/paste t-tests Directly to Manuscripts</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">APA Formatted Bayesian Correlation</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/03/plot_bayesian_model.html">Fancy Plot (with Posterior Samples) for Bayesian Regressions</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/24/n_factors.html">How Many Factors to Retain in Factor Analysis</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html">Beautiful and Powerful Correlation Tables</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/10/interpret_mixed_models.html">Format and Interpret Linear Mixed Models</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">How to do Repeated Measures ANOVAs</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/standardize.html">Standardize (Z-score) a dataframe</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/SDT.html">Compute Signal Detection Theory Indices</a></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+		<li>
+            <a href="https://dominiquemakowski.github.io/" type="footer-links-kudos" target="_blank">© Dominique Makowski</a>
+          </li>
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="../../../../js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.53" />
+
+
+<title>Beautiful and Powerful Correlation Tables in R - Neuropsychology Blog</title>
+<meta property="og:title" content="Beautiful and Powerful Correlation Tables in R - Neuropsychology Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo/logo.PNG"
+         width="1198"
+         height="1198"
+         alt="Neuropsychology Blog">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/neuropsychology/blog">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Dom_Makowski">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">4 min read</span>
+    
+
+    <h1 class="article-title">Beautiful and Powerful Correlation Tables in R</h1>
+
+    
+    <span class="article-date">2018/05/20</span>
+    
+
+    <div class="article-content">
+      
+
+<ul>
+<li><a href="#another-correlation-function">Another <em>correlation</em> function?!</a></li>
+<li><a href="#a-table">A table</a></li>
+<li><a href="#a-plot">A Plot</a></li>
+<li><a href="#a-print">A print</a></li>
+<li><a href="#options">Options</a></li>
+<li><a href="#fun-with-p-hacking">Fun with <em>p</em>-hacking</a></li>
+<li><a href="#credits">Credits</a></li>
+</ul>
+
+<h1 id="another-correlation-function">Another <em>correlation</em> function?!</h1>
+
+<p>Yes, the <code>correlation</code> function from the <a href="https://github.com/neuropsychology/psycho.R"><code>psycho</code></a> package.</p>
+
+<pre><code class="language-r">devtools::install_github(&quot;neuropsychology/psycho.R&quot;)  # Install the newest version
+
+library(psycho)
+library(tidyverse)
+
+cor &lt;- psycho::affective %&gt;% 
+  correlation()
+</code></pre>
+
+<p>This function automatically select numeric variables and run a correlation analysis. It returns a <code>psychobject</code>.</p>
+
+<h1 id="a-table">A table</h1>
+
+<p>We can then extract a <strong>formatted table</strong> that can be saved and pasted into reports and manuscripts by using the <code>summary</code> function.</p>
+
+<pre><code class="language-r">summary(cor)
+# write.csv(summary(cor), &quot;myformattedcortable.csv&quot;)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left">Age</th>
+<th align="left">Life_Satisfaction</th>
+<th align="left">Concealing</th>
+<th align="left">Adjusting</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Age</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Life_Satisfaction</td>
+<td align="left">0.03</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Concealing</td>
+<td align="left">-0.05</td>
+<td align="left">-0.06</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Adjusting</td>
+<td align="left">0.03</td>
+<td align="left">0.36***</td>
+<td align="left">0.22***</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Tolerating</td>
+<td align="left">0.03</td>
+<td align="left">0.15***</td>
+<td align="left">0.07</td>
+<td align="left">0.29***</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="a-plot">A Plot</h1>
+
+<p>It integrates a <strong>plot</strong> done with <a href="https://github.com/kassambara/ggcorrplot"><code>ggcorplot</code></a>.</p>
+
+<pre><code class="language-r">plot(cor)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-05-20-correlation_files/figure-markdown_github/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /></p>
+
+<h1 id="a-print">A print</h1>
+
+<p>It also includes a <strong>pairwise correlation printing</strong> method.</p>
+
+<pre><code class="language-r">print(cor)
+</code></pre>
+
+<pre><code>Pearson Full correlation (p value correction: holm):
+
+   - Age / Life_Satisfaction:   Results of the Pearson correlation showed a non significant and weak negative association between Age and Life_Satisfaction (r(1249) = 0.030, p &gt; .1).
+   - Age / Concealing:   Results of the Pearson correlation showed a non significant and weak positive association between Age and Concealing (r(1249) = -0.050, p &gt; .1).
+   - Life_Satisfaction / Concealing:   Results of the Pearson correlation showed a non significant and weak positive association between Life_Satisfaction and Concealing (r(1249) = -0.063, p &gt; .1).
+   - Age / Adjusting:   Results of the Pearson correlation showed a non significant and weak negative association between Age and Adjusting (r(1249) = 0.027, p &gt; .1).
+   - Life_Satisfaction / Adjusting:   Results of the Pearson correlation showed a significant and moderate negative association between Life_Satisfaction and Adjusting (r(1249) = 0.36, p &lt; .001***).
+   - Concealing / Adjusting:   Results of the Pearson correlation showed a significant and weak negative association between Concealing and Adjusting (r(1249) = 0.22, p &lt; .001***).
+   - Age / Tolerating:   Results of the Pearson correlation showed a non significant and weak negative association between Age and Tolerating (r(1249) = 0.031, p &gt; .1).
+   - Life_Satisfaction / Tolerating:   Results of the Pearson correlation showed a significant and weak negative association between Life_Satisfaction and Tolerating (r(1249) = 0.15, p &lt; .001***).
+   - Concealing / Tolerating:   Results of the Pearson correlation showed a non significant and weak negative association between Concealing and Tolerating (r(1249) = 0.074, p = 0.05°).
+   - Adjusting / Tolerating:   Results of the Pearson correlation showed a significant and weak negative association between Adjusting and Tolerating (r(1249) = 0.29, p &lt; .001***).
+</code></pre>
+
+<h1 id="options">Options</h1>
+
+<p>You can also cutomize the <strong>type</strong> (<em>pearson, spearman or kendall</em>), the <strong>p value correction method</strong> (<em>holm (default), bonferroni, fdr, none&hellip;</em>) and run <strong>partial, semi-partial</strong> or <strong>glasso</strong> correlations.</p>
+
+<pre><code class="language-r">psycho::affective %&gt;% 
+  correlation(method = &quot;pearson&quot;, adjust=&quot;bonferroni&quot;, type=&quot;partial&quot;) %&gt;% 
+  summary()
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left">Age</th>
+<th align="left">Life_Satisfaction</th>
+<th align="left">Concealing</th>
+<th align="left">Adjusting</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Age</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Life_Satisfaction</td>
+<td align="left">0.01</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Concealing</td>
+<td align="left">-0.06</td>
+<td align="left">-0.16***</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Adjusting</td>
+<td align="left">0.02</td>
+<td align="left">0.36***</td>
+<td align="left">0.25***</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Tolerating</td>
+<td align="left">0.02</td>
+<td align="left">0.06</td>
+<td align="left">0.02</td>
+<td align="left">0.24***</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="fun-with-p-hacking">Fun with <em>p</em>-hacking</h1>
+
+<p>In order to <strong>prevent people for running many uncorrected correlation tests</strong> (promoting <em>p</em>-hacking and result-fishing), we included the <code>i_am_cheating</code> parameter. If FALSE (default), the function will help you finding interesting results!</p>
+
+<pre><code class="language-r">df_with_11_vars &lt;- data.frame(replicate(11, rnorm(1000)))
+cor &lt;- correlation(df_with_11_vars, adjust=&quot;none&quot;) 
+</code></pre>
+
+<pre><code>## Warning in correlation(df_with_11_vars, adjust = &quot;none&quot;): We've detected that you are running a lot (&gt; 10) of correlation tests without adjusting the p values. To help you in your p-fishing, we've added some interesting variables: You never know, you might find something significant!
+## To deactivate this, change the 'i_am_cheating' argument to TRUE.
+</code></pre>
+
+<pre><code class="language-r">summary(cor)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left">X1</th>
+<th align="left">X2</th>
+<th align="left">X3</th>
+<th align="left">X4</th>
+<th align="left">X5</th>
+<th align="left">X6</th>
+<th align="left">X7</th>
+<th align="left">X8</th>
+<th align="left">X9</th>
+<th align="left">X10</th>
+<th align="left">X11</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>X1</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X2</td>
+<td align="left">-0.04</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X3</td>
+<td align="left">-0.04</td>
+<td align="left">-0.02</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X4</td>
+<td align="left">0.02</td>
+<td align="left">0.05</td>
+<td align="left">-0.02</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X5</td>
+<td align="left">-0.01</td>
+<td align="left">-0.02</td>
+<td align="left">0.05</td>
+<td align="left">-0.03</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X6</td>
+<td align="left">-0.03</td>
+<td align="left">0.03</td>
+<td align="left">0.08*</td>
+<td align="left">0.02</td>
+<td align="left">0.02</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X7</td>
+<td align="left">0.03</td>
+<td align="left">-0.01</td>
+<td align="left">-0.02</td>
+<td align="left">-0.04</td>
+<td align="left">-0.03</td>
+<td align="left">-0.04</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X8</td>
+<td align="left">0.01</td>
+<td align="left">-0.07*</td>
+<td align="left">0.04</td>
+<td align="left">0.02</td>
+<td align="left">-0.01</td>
+<td align="left">-0.01</td>
+<td align="left">0.00</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X9</td>
+<td align="left">-0.02</td>
+<td align="left">0.03</td>
+<td align="left">-0.03</td>
+<td align="left">-0.02</td>
+<td align="left">0.00</td>
+<td align="left">-0.04</td>
+<td align="left">0.03</td>
+<td align="left">-0.02</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X10</td>
+<td align="left">-0.03</td>
+<td align="left">0.00</td>
+<td align="left">0.00</td>
+<td align="left">0.01</td>
+<td align="left">0.01</td>
+<td align="left">-0.01</td>
+<td align="left">0.01</td>
+<td align="left">-0.02</td>
+<td align="left">0.02</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>X11</td>
+<td align="left">0.01</td>
+<td align="left">0.01</td>
+<td align="left">-0.03</td>
+<td align="left">-0.05</td>
+<td align="left">0.00</td>
+<td align="left">0.05</td>
+<td align="left">0.01</td>
+<td align="left">0.00</td>
+<td align="left">-0.01</td>
+<td align="left">0.07*</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td>Local_Air_Density</td>
+<td align="left">0.26***</td>
+<td align="left">-0.02</td>
+<td align="left">-0.44***</td>
+<td align="left">-0.15***</td>
+<td align="left">-0.25***</td>
+<td align="left">-0.50***</td>
+<td align="left">0.57***</td>
+<td align="left">-0.11***</td>
+<td align="left">0.47***</td>
+<td align="left">0.06</td>
+<td align="left">0.01</td>
+</tr>
+
+<tr>
+<td>Reincarnation_Cycle</td>
+<td align="left">-0.03</td>
+<td align="left">-0.02</td>
+<td align="left">0.02</td>
+<td align="left">0.04</td>
+<td align="left">0.01</td>
+<td align="left">0.00</td>
+<td align="left">0.05</td>
+<td align="left">-0.04</td>
+<td align="left">-0.05</td>
+<td align="left">-0.01</td>
+<td align="left">0.03</td>
+</tr>
+
+<tr>
+<td>Communism_Level</td>
+<td align="left">0.58***</td>
+<td align="left">-0.44***</td>
+<td align="left">0.04</td>
+<td align="left">0.06</td>
+<td align="left">-0.10**</td>
+<td align="left">-0.18***</td>
+<td align="left">0.10**</td>
+<td align="left">0.46***</td>
+<td align="left">-0.50***</td>
+<td align="left">-0.21***</td>
+<td align="left">-0.14***</td>
+</tr>
+
+<tr>
+<td>Alien_Mothership_Distance</td>
+<td align="left">0.00</td>
+<td align="left">-0.03</td>
+<td align="left">0.01</td>
+<td align="left">0.00</td>
+<td align="left">-0.01</td>
+<td align="left">-0.03</td>
+<td align="left">-0.04</td>
+<td align="left">0.01</td>
+<td align="left">0.01</td>
+<td align="left">-0.02</td>
+<td align="left">0.00</td>
+</tr>
+
+<tr>
+<td>Schopenhauers_Optimism</td>
+<td align="left">0.11***</td>
+<td align="left">0.31***</td>
+<td align="left">-0.25***</td>
+<td align="left">0.64***</td>
+<td align="left">-0.29***</td>
+<td align="left">-0.15***</td>
+<td align="left">-0.35***</td>
+<td align="left">-0.09**</td>
+<td align="left">0.08*</td>
+<td align="left">-0.22***</td>
+<td align="left">-0.47***</td>
+</tr>
+
+<tr>
+<td>Hulks_Power</td>
+<td align="left">0.03</td>
+<td align="left">0.00</td>
+<td align="left">0.02</td>
+<td align="left">0.03</td>
+<td align="left">-0.02</td>
+<td align="left">-0.01</td>
+<td align="left">-0.05</td>
+<td align="left">-0.01</td>
+<td align="left">0.00</td>
+<td align="left">0.01</td>
+<td align="left">0.03</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>As we can see, Schopenhauer&rsquo;s Optimism is strongly related to many variables!!!</strong></p>
+
+<h1 id="credits">Credits</h1>
+
+<p>This package was useful? You can cite <a href="https://github.com/neuropsychology/psycho.R"><code>psycho</code></a> as follows:</p>
+
+<ul>
+<li>Makowski, (2018). <em>The psycho Package: an Efficient and Publishing-Oriented Workflow for Psychological Science</em>. Journal of Open Source Software, 3(22), 470. <a href="https://doi.org/10.21105/joss.00470">https://doi.org/10.21105/joss.00470</a></li>
+</ul>
+
+<h1 id="previous-blogposts">Previous blogposts</h1>
+
+<ul>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">Copy/paste t-tests Directly to Manuscripts</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">APA Formatted Bayesian Correlation</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/03/plot_bayesian_model.html">Fancy Plot (with Posterior Samples) for Bayesian Regressions</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/24/n_factors.html">How Many Factors to Retain in Factor Analysis</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html">Beautiful and Powerful Correlation Tables</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/10/interpret_mixed_models.html">Format and Interpret Linear Mixed Models</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">How to do Repeated Measures ANOVAs</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/standardize.html">Standardize (Z-score) a dataframe</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/SDT.html">Compute Signal Detection Theory Indices</a></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+		<li>
+            <a href="https://dominiquemakowski.github.io/" type="footer-links-kudos" target="_blank">© Dominique Makowski</a>
+          </li>
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+  </body>
+</html>
+

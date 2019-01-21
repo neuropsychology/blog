@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.53" />
+
+
+<title>Standardize (Z-score) a dataframe - Neuropsychology Blog</title>
+<meta property="og:title" content="Standardize (Z-score) a dataframe - Neuropsychology Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo/logo.PNG"
+         width="1198"
+         height="1198"
+         alt="Neuropsychology Blog">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/neuropsychology/blog">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Dom_Makowski">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">2 min read</span>
+    
+
+    <h1 class="article-title">Standardize (Z-score) a dataframe</h1>
+
+    
+    <span class="article-date">2018/03/29</span>
+    
+
+    <div class="article-content">
+      
+
+<h2 id="standardize-normalize-z-score-scale">Standardize / Normalize / Z-score / Scale</h2>
+
+<p>The <code>standardize()</code> function allows you to easily scale and center all numeric variables of a dataframe. It is similar to the base function <code>scale()</code>, but presents some advantages: it is tidyverse-friendly, data-type friendly (<em>i.e.</em>, does not transform it into a matrix) and can handle dataframes with categorical data.</p>
+
+<pre><code class="language-r">library(psycho)
+library(tidyverse)
+
+z_iris &lt;- iris %&gt;% 
+  psycho::standardize() 
+
+summary(z_iris)
+</code></pre>
+
+<pre><code>       Species    Sepal.Length       Sepal.Width       Petal.Length    
+ setosa    :50   Min.   :-1.86378   Min.   :-2.4258   Min.   :-1.5623  
+ versicolor:50   1st Qu.:-0.89767   1st Qu.:-0.5904   1st Qu.:-1.2225  
+ virginica :50   Median :-0.05233   Median :-0.1315   Median : 0.3354  
+                 Mean   : 0.00000   Mean   : 0.0000   Mean   : 0.0000  
+                 3rd Qu.: 0.67225   3rd Qu.: 0.5567   3rd Qu.: 0.7602  
+                 Max.   : 2.48370   Max.   : 3.0805   Max.   : 1.7799  
+  Petal.Width     
+ Min.   :-1.4422  
+ 1st Qu.:-1.1799  
+ Median : 0.1321  
+ Mean   : 0.0000  
+ 3rd Qu.: 0.7880  
+ Max.   : 1.7064  
+</code></pre>
+
+<p>But beware, standardization <strong>does not</strong> change (and &ldquo;normalize&rdquo;) the distribution!</p>
+
+<pre><code class="language-r">z_iris %&gt;% 
+  dplyr::select(-Species) %&gt;% 
+  gather(Variable, Value) %&gt;% 
+  ggplot(aes(x=Value, fill=Variable)) +
+      geom_density(alpha=0.5) +
+      geom_vline(aes(xintercept=0)) +
+      theme_bw() +
+      scale_fill_brewer(palette=&quot;Spectral&quot;)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-03-29-standardize_files/figure-markdown_github/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /></p>
+
+<h1 id="previous-blogposts">Previous blogposts</h1>
+
+<ul>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">Copy/paste t-tests Directly to Manuscripts</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">APA Formatted Bayesian Correlation</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/03/plot_bayesian_model.html">Fancy Plot (with Posterior Samples) for Bayesian Regressions</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/24/n_factors.html">How Many Factors to Retain in Factor Analysis</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html">Beautiful and Powerful Correlation Tables</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/10/interpret_mixed_models.html">Format and Interpret Linear Mixed Models</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">How to do Repeated Measures ANOVAs</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/standardize.html">Standardize (Z-score) a dataframe</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/SDT.html">Compute Signal Detection Theory Indices</a></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+		<li>
+            <a href="https://dominiquemakowski.github.io/" type="footer-links-kudos" target="_blank">© Dominique Makowski</a>
+          </li>
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+  </body>
+</html>
+

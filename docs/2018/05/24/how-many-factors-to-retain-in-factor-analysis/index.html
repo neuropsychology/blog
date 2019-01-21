@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.53" />
+
+
+<title>How Many Factors to Retain in Factor Analysis - Neuropsychology Blog</title>
+<meta property="og:title" content="How Many Factors to Retain in Factor Analysis - Neuropsychology Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo/logo.PNG"
+         width="1198"
+         height="1198"
+         alt="Neuropsychology Blog">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/neuropsychology/blog">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Dom_Makowski">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">2 min read</span>
+    
+
+    <h1 class="article-title">How Many Factors to Retain in Factor Analysis</h1>
+
+    
+    <span class="article-date">2018/05/24</span>
+    
+
+    <div class="article-content">
+      
+
+<ul>
+<li><a href="#the-method-agreement-procedure">The method agreement procedure</a></li>
+<li><a href="#tweaking">Tweaking</a></li>
+<li><a href="#credits">Credits</a></li>
+</ul>
+
+<h1 id="the-method-agreement-procedure">The method agreement procedure</h1>
+
+<p>When running a factor analysis, one often needs to know how many components / latent variables to retain. Fortunately, many methods exist to statistically answer this question. Unfortunately, there is no consensus on which method to use. Therefore, the <code>n_factors()</code> function, available in the <a href="https://github.com/neuropsychology/psycho.R">psycho</a> package, performs the <strong>method agreement procedure</strong>: it runs all the routines and returns the number of factors with the highest consensus.</p>
+
+<pre><code class="language-r"># devtools::install_github(&quot;neuropsychology/psycho.R&quot;)  # Install the last psycho version if needed
+
+library(tidyverse)
+library(psycho)
+
+results &lt;- attitude %&gt;%
+  psycho::n_factors()
+
+print(results)
+</code></pre>
+
+<pre><code>## The choice of 1 factor is supported by 5 (out of 9; 55.56%) methods (Optimal Coordinates, Acceleration Factor, Parallel Analysis, Velicer MAP, VSS Complexity 1).
+</code></pre>
+
+<p>We can have an overview of all values by using the <code>summary</code> method.</p>
+
+<table>
+<thead>
+<tr>
+<th align="right">n.Factors</th>
+<th align="right">n.Methods</th>
+<th align="right">Eigenvalues</th>
+<th align="right">Cum.Variance</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">3.72</td>
+<td align="right">0.53</td>
+</tr>
+
+<tr>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">1.14</td>
+<td align="right">0.69</td>
+</tr>
+
+<tr>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">0.85</td>
+<td align="right">0.81</td>
+</tr>
+
+<tr>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">0.61</td>
+<td align="right">0.90</td>
+</tr>
+
+<tr>
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">0.32</td>
+<td align="right">0.95</td>
+</tr>
+
+<tr>
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">0.22</td>
+<td align="right">0.98</td>
+</tr>
+
+<tr>
+<td align="right">7</td>
+<td align="right">0</td>
+<td align="right">0.14</td>
+<td align="right">1.00</td>
+</tr>
+</tbody>
+</table>
+
+<p>And, of course, plot it :)</p>
+
+<pre><code class="language-r">plot(results)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-05-24-n_factors_files/figure-markdown_github/unnamed-chunk-4-1.png" alt="" /></p>
+
+<p>The plot shows the <strong>number of methods</strong> (in yellow), the <strong>Eigenvalues</strong> (red line) and the cumulative proportion of <strong>explained variance</strong> (blue line).</p>
+
+<p>For more details, we can also extract the final result (the optimal number of factors) for each method:</p>
+
+<pre><code class="language-r">summary(results)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">Method</th>
+<th align="right">n_optimal</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Optimal Coordinates</td>
+<td align="right">1</td>
+</tr>
+
+<tr>
+<td align="left">Acceleration Factor</td>
+<td align="right">1</td>
+</tr>
+
+<tr>
+<td align="left">Parallel Analysis</td>
+<td align="right">1</td>
+</tr>
+
+<tr>
+<td align="left">Eigenvalues (Kaiser Criterion)</td>
+<td align="right">2</td>
+</tr>
+
+<tr>
+<td align="left">Velicer MAP</td>
+<td align="right">1</td>
+</tr>
+
+<tr>
+<td align="left">BIC</td>
+<td align="right">2</td>
+</tr>
+
+<tr>
+<td align="left">Sample Size Adjusted BIC</td>
+<td align="right">3</td>
+</tr>
+
+<tr>
+<td align="left">VSS Complexity 1</td>
+<td align="right">1</td>
+</tr>
+
+<tr>
+<td align="left">VSS Complexity 2</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="tweaking">Tweaking</h1>
+
+<p>We can also provide a correlation matrix, as well as changing the rotation and the factoring method.</p>
+
+<pre><code class="language-r">df &lt;- psycho::affective
+
+cor_mat &lt;- psycho::correlation(df)
+cor_mat &lt;- cor_mat$values$r
+
+results &lt;- cor_mat %&gt;%
+  psycho::n_factors(rotate = &quot;oblimin&quot;, fm = &quot;mle&quot;, n=nrow(df))
+
+print(results)
+</code></pre>
+
+<pre><code>## The choice of 2 factors is supported by 5 (out of 9; 55.56%) methods (Parallel Analysis, Eigenvalues (Kaiser Criterion), BIC, Sample Size Adjusted BIC, VSS Complexity 2).
+</code></pre>
+
+<pre><code class="language-r">plot(results)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-05-24-n_factors_files/figure-markdown_github/unnamed-chunk-7-1.png" alt="" /></p>
+
+<h1 id="credits">Credits</h1>
+
+<p>This package helped you? Don&rsquo;t forget to cite the various packages you used :)</p>
+
+<p>You can cite <code>psycho</code> as follows:</p>
+
+<ul>
+<li>Makowski, (2018). <em>The psycho Package: an Efficient and Publishing-Oriented Workflow for Psychological Science</em>. Journal of Open Source Software, 3(22), 470. <a href="https://doi.org/10.21105/joss.00470">https://doi.org/10.21105/joss.00470</a></li>
+</ul>
+
+<h1 id="previous-blogposts">Previous blogposts</h1>
+
+<ul>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">Copy/paste t-tests Directly to Manuscripts</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">APA Formatted Bayesian Correlation</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/03/plot_bayesian_model.html">Fancy Plot (with Posterior Samples) for Bayesian Regressions</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/24/n_factors.html">How Many Factors to Retain in Factor Analysis</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html">Beautiful and Powerful Correlation Tables</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/10/interpret_mixed_models.html">Format and Interpret Linear Mixed Models</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">How to do Repeated Measures ANOVAs</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/standardize.html">Standardize (Z-score) a dataframe</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/SDT.html">Compute Signal Detection Theory Indices</a></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+		<li>
+            <a href="https://dominiquemakowski.github.io/" type="footer-links-kudos" target="_blank">© Dominique Makowski</a>
+          </li>
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="../../../../js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

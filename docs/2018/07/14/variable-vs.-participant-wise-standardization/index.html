@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.53" />
+
+
+<title>Variable vs. Participant-wise Standardization - Neuropsychology Blog</title>
+<meta property="og:title" content="Variable vs. Participant-wise Standardization - Neuropsychology Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo/logo.PNG"
+         width="1198"
+         height="1198"
+         alt="Neuropsychology Blog">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/neuropsychology/blog">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Dom_Makowski">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">6 min read</span>
+    
+
+    <h1 class="article-title">Variable vs. Participant-wise Standardization</h1>
+
+    
+    <span class="article-date">2018/07/14</span>
+    
+
+    <div class="article-content">
+      
+
+<ul>
+<li><a href="#the-data">The data</a></li>
+<li><a href="#standardize">Standardize</a></li>
+<li><a href="#effect-of-standardization">Effect of Standardization</a>
+
+<ul>
+<li><a href="#at-a-general-level">At a general level</a></li>
+<li><a href="#at-a-participant-level">At a participant level</a></li>
+<li><a href="#distribution">Distribution</a></li>
+</ul></li>
+<li><a href="#correlation">Correlation</a></li>
+<li><a href="#test">Test</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#credits">Credits</a></li>
+<li><a href="#previous-blogposts">Previous blogposts</a></li>
+</ul>
+
+<p>To make sense of their data and effects, psychologists often standardize (Z-score) their variables. However, in repeated-measures designs, there are three ways of standardizing data:</p>
+
+<ul>
+<li><strong>Variable-wise</strong>: The most common method. A simple scaling and reducing of each variable by their mean and SD.</li>
+<li><strong>Participant-wise</strong>: Variables are standardized &ldquo;within&rdquo; each participant, <em>i.e.</em>, for each participant, by the participant&rsquo;s mean and SD.</li>
+<li><strong>Full</strong>: Participant-wise first and then re-standardizing variable-wise.</li>
+</ul>
+
+<p>Unfortunately, the method used is often not explicitly stated. This is an issue as these methods can generate important discrepancies that contribute to the reproducibility crisis of psychological science.</p>
+
+<p>In the following, we will see how to perform those methods and look for differences.</p>
+
+<h1 id="the-data">The data</h1>
+
+<p>We will take a dataset in which participants were exposed to negative pictures and had to rate their emotions (<strong>valence</strong>) and the amount of memories associated with the picture (<strong>autobiographical link</strong>). One could make the hypothesis that for young participants with no context of war or violence, the most negative pictures (mutilations) are less related to memories than less negative pictures (involving for example car crashes or sick people). In other words, <strong>we expect a positive relationship between valence</strong> (with high values corresponding to less negativity) <strong>and autobiographical link</strong>.</p>
+
+<p>Let&rsquo;s have a look at the data, averaged by participants:</p>
+
+<pre><code class="language-r">library(tidyverse)
+library(psycho)
+
+df &lt;- psycho::emotion %&gt;%  # Load the dataset from the psycho package
+  filter(Emotion_Condition == &quot;Negative&quot;)  # Discard neutral pictures
+
+df %&gt;% 
+  group_by(Participant_ID) %&gt;% 
+  summarise(n_Trials = n(),
+            Valence_Mean = mean(Subjective_Valence, na.rm=TRUE),
+            Valence_SD = sd(Subjective_Valence, na.rm=TRUE),
+            Autobiographical_Link_Mean = mean(Autobiographical_Link, na.rm=TRUE),
+            Autobiographical_Link_SD = sd(Autobiographical_Link, na.rm=TRUE)) %&gt;% 
+  mutate(Valence = paste(Valence_Mean, Valence_SD, sep=&quot; +- &quot;),
+         Autobiographical_Link = paste(Autobiographical_Link_Mean, Autobiographical_Link_SD, sep=&quot; +- &quot;)) %&gt;% 
+  select(-ends_with(&quot;SD&quot;), -ends_with(&quot;Mean&quot;))
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">Participant_ID</th>
+<th align="right">n_Trials</th>
+<th align="left">Valence</th>
+<th align="left">Autobiographical_Link</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">10S</td>
+<td align="right">24</td>
+<td align="left">-58.07 +- 42.59</td>
+<td align="left">49.88 +- 29.60</td>
+</tr>
+
+<tr>
+<td align="left">11S</td>
+<td align="right">24</td>
+<td align="left">-73.22 +- 37.01</td>
+<td align="left">0.94 +- 3.46</td>
+</tr>
+
+<tr>
+<td align="left">12S</td>
+<td align="right">24</td>
+<td align="left">-57.53 +- 26.56</td>
+<td align="left">30.24 +- 27.87</td>
+</tr>
+
+<tr>
+<td align="left">13S</td>
+<td align="right">24</td>
+<td align="left">-63.22 +- 23.72</td>
+<td align="left">27.86 +- 35.81</td>
+</tr>
+
+<tr>
+<td align="left">14S</td>
+<td align="right">24</td>
+<td align="left">-56.60 +- 26.47</td>
+<td align="left">3.31 +- 11.20</td>
+</tr>
+
+<tr>
+<td align="left">15S</td>
+<td align="right">24</td>
+<td align="left">-60.59 +- 33.71</td>
+<td align="left">17.64 +- 17.36</td>
+</tr>
+
+<tr>
+<td align="left">16S</td>
+<td align="right">24</td>
+<td align="left">-46.12 +- 24.88</td>
+<td align="left">15.33 +- 16.57</td>
+</tr>
+
+<tr>
+<td align="left">17S</td>
+<td align="right">24</td>
+<td align="left">-1.54 +- 4.98</td>
+<td align="left">0.13 +- 0.64</td>
+</tr>
+
+<tr>
+<td align="left">18S</td>
+<td align="right">24</td>
+<td align="left">-67.23 +- 34.98</td>
+<td align="left">22.71 +- 20.07</td>
+</tr>
+
+<tr>
+<td align="left">19S</td>
+<td align="right">24</td>
+<td align="left">-59.61 +- 33.22</td>
+<td align="left">28.37 +- 12.55</td>
+</tr>
+</tbody>
+</table>
+
+<p>As we can see from the means and SDs, there is a lot of variability <strong>between and within</strong> participants.</p>
+
+<h1 id="standardize">Standardize</h1>
+
+<p>We will create three dataframes standardized with each of the three techniques.</p>
+
+<pre><code class="language-r">Z_VarWise &lt;- df %&gt;% 
+  standardize()
+
+Z_ParWise &lt;- df %&gt;% 
+  group_by(Participant_ID) %&gt;% 
+  standardize() 
+
+Z_Full &lt;- df %&gt;% 
+  group_by(Participant_ID) %&gt;% 
+  standardize() %&gt;% 
+  ungroup() %&gt;% 
+  standardize() 
+</code></pre>
+
+<h1 id="effect-of-standardization">Effect of Standardization</h1>
+
+<p>Let&rsquo;s see how these three standardization techniques affected the <strong>Valence</strong> variable.</p>
+
+<h2 id="at-a-general-level">At a general level</h2>
+
+<pre><code class="language-r"># Create convenient function
+print_summary &lt;- function(data){
+  paste(deparse(substitute(data)), &quot;:&quot;, 
+        format_digit(mean(data[[&quot;Subjective_Valence&quot;]])),
+        &quot;+-&quot;,
+        format_digit(sd(data[[&quot;Subjective_Valence&quot;]])),
+        &quot;[&quot;, format_digit(min(data[[&quot;Subjective_Valence&quot;]])),
+        &quot;,&quot;, format_digit(max(data[[&quot;Subjective_Valence&quot;]])),
+        &quot;]&quot;)
+}
+
+# Check the results
+print_summary(Z_VarWise)
+</code></pre>
+
+<pre><code>[1] &quot;Z_VarWise : 0 +- 1.00 [ -1.18 , 3.10 ]&quot;
+</code></pre>
+
+<pre><code class="language-r">print_summary(Z_ParWise)
+</code></pre>
+
+<pre><code>[1] &quot;Z_ParWise : 0 +- 0.98 [ -2.93 , 3.29 ]&quot;
+</code></pre>
+
+<pre><code class="language-r">print_summary(Z_Full)
+</code></pre>
+
+<pre><code>[1] &quot;Z_Full : 0 +- 1.00 [ -2.99 , 3.36 ]&quot;
+</code></pre>
+
+<h2 id="at-a-participant-level">At a participant level</h2>
+
+<pre><code class="language-r"># Create convenient function
+print_participants &lt;- function(data){
+  data %&gt;% 
+    group_by(Participant_ID) %&gt;% 
+    summarise(Mean = mean(Subjective_Valence), 
+              SD = sd(Subjective_Valence)) %&gt;% 
+    mutate_if(is.numeric, round, 2) %&gt;% 
+    head(5) 
+    
+}
+
+# Check the results
+print_participants(Z_VarWise)
+</code></pre>
+
+<pre><code># A tibble: 5 x 3
+  Participant_ID    Mean    SD
+  &lt;fct&gt;            &lt;dbl&gt; &lt;dbl&gt;
+1 10S            -0.0500 1.15 
+2 11S            -0.460  1.00 
+3 12S            -0.0300 0.720
+4 13S            -0.190  0.640
+5 14S            -0.0100 0.710
+</code></pre>
+
+<pre><code class="language-r">print_participants(Z_ParWise)
+</code></pre>
+
+<pre><code># A tibble: 5 x 3
+  Participant_ID  Mean    SD
+  &lt;fct&gt;          &lt;dbl&gt; &lt;dbl&gt;
+1 10S               0.    1.
+2 11S               0.    1.
+3 12S               0.    1.
+4 13S               0.    1.
+5 14S               0.    1.
+</code></pre>
+
+<pre><code class="language-r">print_participants(Z_Full)
+</code></pre>
+
+<pre><code># A tibble: 5 x 3
+  Participant_ID  Mean    SD
+  &lt;fct&gt;          &lt;dbl&gt; &lt;dbl&gt;
+1 10S               0.  1.02
+2 11S               0.  1.02
+3 12S               0.  1.02
+4 13S               0.  1.02
+5 14S               0.  1.02
+</code></pre>
+
+<h2 id="distribution">Distribution</h2>
+
+<pre><code class="language-r">data.frame(VarWise = Z_VarWise$Subjective_Valence,
+           ParWise = Z_ParWise$Subjective_Valence,
+           Full = Z_Full$Subjective_Valence) %&gt;% 
+  gather(Method, Variable) %&gt;% 
+  ggplot(aes(x=Variable, fill=Method)) +
+  geom_density(alpha=0.5) +
+  theme_minimal() 
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-07-14-standardize_grouped_df_files/figure-markdown_github/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /></p>
+
+<p>The distributions appear to be similar&hellip;</p>
+
+<h1 id="correlation">Correlation</h1>
+
+<p>Let&rsquo;s do a <strong>correlation</strong> between the <strong>variable-wise and participant-wise methods</strong>.</p>
+
+<pre><code class="language-r">psycho::bayes_cor.test(Z_VarWise$Subjective_Valence, Z_ParWise$Subjective_Valence)
+</code></pre>
+
+<pre><code>Results of the Bayesian correlation indicate moderate evidence (BF = 8.65) in favour of an absence of a negative association between Z_VarWise$Subjective_Valence and Z_ParWise$Subjective_Valence (r = -0.015, MAD = 0.047, 90% CI [-0.096, 0.057]). The correlation can be considered as small or very small with respective probabilities of 3.46% and 59.43%.
+</code></pre>
+
+<pre><code class="language-r">data.frame(Original = df$Subjective_Valence,
+           VarWise = Z_VarWise$Subjective_Valence,
+           ParWise = Z_ParWise$Subjective_Valence) %&gt;% 
+  ggplot(aes(x=VarWise, y=ParWise, colour=Original)) +
+  geom_point() +
+  geom_smooth(method=&quot;lm&quot;) +
+  theme_minimal()
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-07-14-standardize_grouped_df_files/figure-markdown_github/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /></p>
+
+<p><strong>While the three standardization methods roughly present the same characteristics at a general level (mean 0 and SD 1) and a similar distribution, their values are very different and completely uncorrelated!</strong></p>
+
+<h1 id="test">Test</h1>
+
+<p>Let&rsquo;s now answer to the original question by investigating the <strong>linear relationship between valence and autobiographical link</strong>. We can do this by running a mixed model with participants entered as random effects.</p>
+
+<pre><code class="language-r"># Convenient function
+print_model &lt;- function(data){
+  type_name &lt;- deparse(substitute(data)) 
+
+  lmerTest::lmer(Subjective_Valence ~ Autobiographical_Link + (1|Participant_ID), data=data) %&gt;% 
+    psycho::analyze(CI=NULL) %&gt;%
+    summary() %&gt;% 
+    filter(Variable == &quot;Autobiographical_Link&quot;) %&gt;% 
+    mutate(Type = type_name,
+           Coef = round(Coef, 2),
+           p = format_p(p)) %&gt;% 
+    select(Type, Coef, p)
+}
+
+# Run the model on all datasets
+rbind(print_model(df), 
+      print_model(Z_VarWise),
+      print_model(Z_ParWise),
+      print_model(Z_Full))
+</code></pre>
+
+<pre><code>       Type Coef       p
+1        df 0.09    &gt; .1
+2 Z_VarWise 0.07    &gt; .1
+3 Z_ParWise 0.08 = 0.08°
+4    Z_Full 0.08 = 0.08°
+</code></pre>
+
+<p>As we can see, in our case, using <strong>participant-wise standardization resulted in a significant (at <em>p</em> = .1) effect</strong>! But keep in mind that <em>this is not always the case</em>. In can be the contrary, or generate very similar results. <strong>No method is better or more justified, and its choice depends on the specific case, context, data and goal</strong>.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<ol>
+<li><strong>Standardization can be useful in <em>some</em> cases and should be justified</strong></li>
+<li><strong>Variable and Participant-wise standardization methods produce &ldquo;in appearance&rdquo; similar data</strong></li>
+<li><strong>Variable and Participant-wise standardization can lead to different and uncorrelated results</strong></li>
+<li><strong>The choice of the method can strongly influence the results and thus, should be explicitly stated</strong></li>
+</ol>
+
+<p>We showed here yet another way of <strong>sneakily tweaking the data</strong> that can change the results. <strong>To prevent its use for <em>p</em>-hacking, we can only support the generalization of open-data, open-analysis and preregistration</strong>.</p>
+
+<h1 id="credits">Credits</h1>
+
+<p>The psycho package helped you? Don&rsquo;t forget to cite the various packages you used :)</p>
+
+<p>You can cite <code>psycho</code> as follows:</p>
+
+<ul>
+<li>Makowski, (2018). <em>The psycho Package: An Efficient and Publishing-Oriented Workflow for Psychological Science</em>. Journal of Open Source Software, 3(22), 470. <a href="https://doi.org/10.21105/joss.00470">https://doi.org/10.21105/joss.00470</a></li>
+</ul>
+
+<h1 id="previous-blogposts">Previous blogposts</h1>
+
+<ul>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/28/analyze_correlation.html">Formatted Correlation with Effect Size</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/25/refdata.html">Extracting a Reference Grid of your Data for Machine Learning Models Visualization</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">Copy/paste t-tests Directly to Manuscripts</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">Easy APA Formatted Bayesian Correlation</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/03/plot_bayesian_model.html">Fancy Plot (with Posterior Samples) for Bayesian Regressions</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/24/n_factors.html">How Many Factors to Retain in Factor Analysis</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html">Beautiful and Powerful Correlation Tables</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/10/interpret_mixed_models.html">Format and Interpret Linear Mixed Models</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">How to do Repeated Measures ANOVAs</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/standardize.html">Standardize (Z-score) a dataframe</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/SDT.html">Compute Signal Detection Theory Indices</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/21/installingR.html">Installing R, R Studio and psycho</a></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+		<li>
+            <a href="https://dominiquemakowski.github.io/" type="footer-links-kudos" target="_blank">© Dominique Makowski</a>
+          </li>
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="../../../../js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

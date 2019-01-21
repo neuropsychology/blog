@@ -1,2 +1,2 @@
-# blog
-The technical aspect of neuroscience and psychology
+# neuropsychoblog
+The neuroscience and psychology blog

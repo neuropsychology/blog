@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Neuropsychology Blog</title>
+    <link>/</link>
+    <description>Recent content on Neuropsychology Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 21 Jan 2019 21:48:51 -0700</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>About</title>
+      <link>/about/</link>
+      <pubDate>Mon, 21 Jan 2019 21:48:51 -0700</pubDate>
+      
+      <guid>/about/</guid>
+      <description>A blog related to the technical aspects of research in neuroscience and psychology.
+Have an idea that you&amp;rsquo;d like to share? This blog is open to contributions. Write a post and submit it here 😄.</description>
+    </item>
+    
+    <item>
+      <title>My Test Post</title>
+      <link>/2019/01/21/tespost/</link>
+      <pubDate>Mon, 21 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/01/21/tespost/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>How to Cite Packages</title>
+      <link>/2018/08/31/how-to-cite-packages/</link>
+      <pubDate>Fri, 31 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/31/how-to-cite-packages/</guid>
+      <description>What should I cite? How should I cite it? Previous blogposts  Citing the packages, modules and softwares you used for your analysis is important, both from a reproducibility perspective (statistical routines are often implemented in different ways by different packages, which could explain slight discrepancies in the results. Saying &amp;ldquo;I did this using this function from that package version 1.2.3&amp;rdquo; is a way of protecting yourself by being clear about what you have found doing what you have done) but also for acknowledging the work and time that people spent creating tools for others (sometimes at the expense of their own research).</description>
+    </item>
+    
+    <item>
+      <title>The end of errors in ANOVA reporting</title>
+      <link>/2018/07/20/the-end-of-errors-in-anova-reporting/</link>
+      <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/20/the-end-of-errors-in-anova-reporting/</guid>
+      <description>Fit an anova APA formatted output Correlations, t-tests, regressions&amp;hellip; Evolution Credits On similar topics  Psychology is still (unfortunately) massively using analysis of variance (ANOVA). Despite its relative simplicity, I am very often confronted to errors in its reporting, for instance in student&amp;rsquo;s theses or manuscripts. Beyond the incomplete, uncomprehensible or just wrong reporting, one can find a tremendous amount of genuine errors (that could influence the results and their intepretation), even in published papers!</description>
+    </item>
+    
+    <item>
+      <title>Variable vs. Participant-wise Standardization</title>
+      <link>/2018/07/14/variable-vs.-participant-wise-standardization/</link>
+      <pubDate>Sat, 14 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/14/variable-vs.-participant-wise-standardization/</guid>
+      <description>The data Standardize Effect of Standardization  At a general level At a participant level Distribution  Correlation Test Conclusion Credits Previous blogposts  To make sense of their data and effects, psychologists often standardize (Z-score) their variables. However, in repeated-measures designs, there are three ways of standardizing data:
+ Variable-wise: The most common method. A simple scaling and reducing of each variable by their mean and SD. Participant-wise: Variables are standardized &amp;ldquo;within&amp;rdquo; each participant, i.</description>
+    </item>
+    
+    <item>
+      <title>Formatted Correlation with Effect Size</title>
+      <link>/2018/06/28/formatted-correlation-with-effect-size/</link>
+      <pubDate>Thu, 28 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/06/28/formatted-correlation-with-effect-size/</guid>
+      <description>Do a correlation APA formatted output Dataframe of Values Bayesian Correlation Contribute Credits Previous blogposts  One of the most time-consuming part of data analysis in psychology is the copy-pasting of specific values of some R output to a manuscript or a report. This task is frustrating, prone to errors, and increase de variability of statistical reporting. At the sime time, standardizing practices of what and how to report is crucial for reproducibility and clarity.</description>
+    </item>
+    
+    <item>
+      <title>Extracting a Reference Grid of your Data for Machine Learning Models Visualization</title>
+      <link>/2018/06/25/extracting-a-reference-grid-of-your-data-for-machine-learning-models-visualization/</link>
+      <pubDate>Mon, 25 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/06/25/extracting-a-reference-grid-of-your-data-for-machine-learning-models-visualization/</guid>
+      <description>Sometimes, for visualization purposes, we want to extract a reference grid of our dataset. This reference grid often contains equally spaced values of a &amp;ldquo;target&amp;rdquo; variable, and all other variables &amp;ldquo;fixed&amp;rdquo; by their mean, median or reference level. The refdata of the psycho package was built to do just that.
+The Model Let&amp;rsquo;s build a complex machine learning model (a neural network) predicting the Sex (the probability of being a man, as women are here the reference level) of our participants with all the variables of the dataframe.</description>
+    </item>
+    
+    <item>
+      <title>Copy/paste t-tests Directly to Manuscripts</title>
+      <link>/2018/06/19/copy-paste-t-tests-directly-to-manuscripts/</link>
+      <pubDate>Tue, 19 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/06/19/copy-paste-t-tests-directly-to-manuscripts/</guid>
+      <description>Do a t-test APA formatted output Flexibility Dataframe of Values Contribute Credits Previous blogposts  One of the most time-consuming part of data analysis in psychology is the copy-pasting of specific values of some R output to a manuscript or a report. This task is frustrating, prone to errors, and increases the variability of statistical reporting. This is an important issue, as standardizing practices of what and how to report might be a key to overcome the reproducibility crisis of psychology.</description>
+    </item>
+    
+    <item>
+      <title>Easy APA Formatted Bayesian Correlation</title>
+      <link>/2018/06/11/easy-apa-formatted-bayesian-correlation/</link>
+      <pubDate>Mon, 11 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/06/11/easy-apa-formatted-bayesian-correlation/</guid>
+      <description>Traditional Correlation Bayesian APA formatted Correlation Indices Posterior Credits  The Bayesian framework is the right way to go for psychological science. To facilitate its use for newcommers, we implemented the bayes_cor.test function in the psycho package, a user-friendly wrapper for the correlationBF function of the great BayesFactor package by Richard D. Morey.
+Traditional Correlation Let&amp;rsquo;s first perform a traditional correlation.
+# devtools::install_github(&amp;quot;neuropsychology/psycho.R&amp;quot;) # Install the latest psycho version # Load packages library(tidyverse) library(psycho) # Import data df &amp;lt;- psycho::affective cor.</description>
+    </item>
+    
+    <item>
+      <title>Fancy Plot (with Posterior Samples) for Bayesian Regressions</title>
+      <link>/2018/06/03/fancy-plot-with-posterior-samples-for-bayesian-regressions/</link>
+      <pubDate>Sun, 03 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/06/03/fancy-plot-with-posterior-samples-for-bayesian-regressions/</guid>
+      <description>The Model Plot Credits  As Bayesian models usually generate a lot of samples (iterations), one could want to plot them as well, instead (or along) the posterior &amp;ldquo;summary&amp;rdquo; (with indices like the 90% HDI). This can be done quite easily by extracting all the iterations in get_predicted from the psycho package.
+The Model # devtools::install_github(&amp;quot;neuropsychology/psycho.R&amp;quot;) # Install the last psycho version if needed # Load packages library(tidyverse) library(psycho) # Import data df &amp;lt;- psycho::affective # Fit a logistic regression model fit &amp;lt;- rstanarm::stan_glm(Sex ~ Adjusting, data=df, family = &amp;quot;binomial&amp;quot;)  We fitted a Bayesian logistic regression to predict the sex (W / M) with one&amp;rsquo;s ability to flexibly adjust to his/her emotional reaction.</description>
+    </item>
+    
+    <item>
+      <title>How Many Factors to Retain in Factor Analysis</title>
+      <link>/2018/05/24/how-many-factors-to-retain-in-factor-analysis/</link>
+      <pubDate>Thu, 24 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/05/24/how-many-factors-to-retain-in-factor-analysis/</guid>
+      <description>The method agreement procedure Tweaking Credits  The method agreement procedure When running a factor analysis, one often needs to know how many components / latent variables to retain. Fortunately, many methods exist to statistically answer this question. Unfortunately, there is no consensus on which method to use. Therefore, the n_factors() function, available in the psycho package, performs the method agreement procedure: it runs all the routines and returns the number of factors with the highest consensus.</description>
+    </item>
+    
+    <item>
+      <title>Beautiful and Powerful Correlation Tables in R</title>
+      <link>/2018/05/20/beautiful-and-powerful-correlation-tables-in-r/</link>
+      <pubDate>Sun, 20 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/05/20/beautiful-and-powerful-correlation-tables-in-r/</guid>
+      <description>Another correlation function?! A table A Plot A print Options Fun with p-hacking Credits  Another correlation function?! Yes, the correlation function from the psycho package.
+devtools::install_github(&amp;quot;neuropsychology/psycho.R&amp;quot;) # Install the newest version library(psycho) library(tidyverse) cor &amp;lt;- psycho::affective %&amp;gt;% correlation()  This function automatically select numeric variables and run a correlation analysis. It returns a psychobject.
+A table We can then extract a formatted table that can be saved and pasted into reports and manuscripts by using the summary function.</description>
+    </item>
+    
+    <item>
+      <title>Format and Interpret Linear Mixed Models</title>
+      <link>/2018/05/10/format-and-interpret-linear-mixed-models/</link>
+      <pubDate>Thu, 10 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/05/10/format-and-interpret-linear-mixed-models/</guid>
+      <description>The data Fit the model The analyze function Summary Print Credits  You find it time-consuming to manually format, copy and paste output values to your report or manuscript? That time is over: the psycho package is here for you!
+The data Let&amp;rsquo;s take the example dataset included in the psycho package.
+library(psycho) library(tidyverse) df &amp;lt;- psycho::emotion %&amp;gt;% select(Participant_ID, Emotion_Condition, Subjective_Valence, Autobiographical_Link) summary(df)   Participant_ID Emotion_Condition Subjective_Valence Autobiographical_Link 10S : 48 Negative:456 Min.</description>
+    </item>
+    
+    <item>
+      <title>How to do Repeated Measures ANOVAs in R</title>
+      <link>/2018/05/01/how-to-do-repeated-measures-anovas-in-r/</link>
+      <pubDate>Tue, 01 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/05/01/how-to-do-repeated-measures-anovas-in-r/</guid>
+      <description>Don&amp;rsquo;t do it The Emotion Dataset The effect of Emotion Post-hoc / Contrast Analysis Interaction Note Credits  Don&amp;rsquo;t do it Ha! Got ya! Trying to run some old school ANOVAs hum? I&amp;rsquo;ll show you even better!
+There is now a tremendous amount of data showing the inadequacy of ANOVAs as a statistical procedure (Camilli, 1987; Levy, 1978; Vasey, 1987; Chang, 2009). Instead, many papers suggest moving toward the mixed-modelling framework (Kristensen, 2004; Jaeger, 2008), which was shown to be more flexible, accurate, powerful and suited for psychological data.</description>
+    </item>
+    
+    <item>
+      <title>Compute Signal Detection Theory Indices with R</title>
+      <link>/2018/03/29/compute-signal-detection-theory-indices-with-r/</link>
+      <pubDate>Thu, 29 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/03/29/compute-signal-detection-theory-indices-with-r/</guid>
+      <description>Signal Detection Theory Indices (dprime, beta&amp;hellip;) Signal detection theory (SDT) is used when psychologists want to measure the way we make decisions under conditions of uncertainty. SDT assumes that the decision maker is not a passive receiver of information, but an active decision-maker who makes difficult perceptual judgments under conditions of uncertainty. To apply signal detection theory to a data set where stimuli were either present or absent, and the observer categorized each trial as having the stimulus present or absent, the trials are sorted into one of four categories: Hit, Miss, Correct Rejection and False Alarm.</description>
+    </item>
+    
+    <item>
+      <title>Standardize (Z-score) a dataframe</title>
+      <link>/2018/03/29/standardize-z-score-a-dataframe/</link>
+      <pubDate>Thu, 29 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/03/29/standardize-z-score-a-dataframe/</guid>
+      <description>Standardize / Normalize / Z-score / Scale The standardize() function allows you to easily scale and center all numeric variables of a dataframe. It is similar to the base function scale(), but presents some advantages: it is tidyverse-friendly, data-type friendly (i.e., does not transform it into a matrix) and can handle dataframes with categorical data.
+library(psycho) library(tidyverse) z_iris &amp;lt;- iris %&amp;gt;% psycho::standardize() summary(z_iris)   Species Sepal.Length Sepal.Width Petal.Length setosa :50 Min.</description>
+    </item>
+    
+    <item>
+      <title>Installing R and R studio</title>
+      <link>/2018/03/21/installing-r-and-r-studio/</link>
+      <pubDate>Wed, 21 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/03/21/installing-r-and-r-studio/</guid>
+      <description>Guide Install R and R Studio  Go here: https://cloud.r-project.org/ Download the last version for your OS Install it Go here: https://www.rstudio.com/products/rstudio/download/#download Download the right version for your OS Install it Start R studio  Install the psycho package If you&amp;rsquo;ve never used psycho, enter one of the following in the console and press enter:
+# This for the stable version: install.packages(&amp;quot;psycho&amp;quot;) # Or this for the dev version: install.</description>
+    </item>
+    
+    <item>
+      <title>Hello R Markdown</title>
+      <link>/2015/07/23/hello-r-markdown/</link>
+      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
+      
+      <guid>/2015/07/23/hello-r-markdown/</guid>
+      <description>R MarkdownThis is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
+You can embed an R code chunk like this:
+summary(cars)## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+    </item>
+    
+  </channel>
+</rss>

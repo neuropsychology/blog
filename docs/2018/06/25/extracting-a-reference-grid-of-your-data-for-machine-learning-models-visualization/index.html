@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.53" />
+
+
+<title>Extracting a Reference Grid of your Data for Machine Learning Models Visualization - Neuropsychology Blog</title>
+<meta property="og:title" content="Extracting a Reference Grid of your Data for Machine Learning Models Visualization - Neuropsychology Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo/logo.PNG"
+         width="1198"
+         height="1198"
+         alt="Neuropsychology Blog">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/neuropsychology/blog">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Dom_Makowski">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">6 min read</span>
+    
+
+    <h1 class="article-title">Extracting a Reference Grid of your Data for Machine Learning Models Visualization</h1>
+
+    
+    <span class="article-date">2018/06/25</span>
+    
+
+    <div class="article-content">
+      
+
+<p>Sometimes, for visualization purposes, we want to extract a reference grid of our dataset. This reference grid often contains equally spaced values of a &ldquo;target&rdquo; variable, and all other variables &ldquo;fixed&rdquo; by their mean, median or reference level. The <code>refdata</code> of the <a href="https://github.com/neuropsychology/psycho.R"><code>psycho</code> package</a> was built to do just that.</p>
+
+<h1 id="the-model">The Model</h1>
+
+<p>Let&rsquo;s build a complex machine learning model (a neural network) predicting the Sex (the probability of being a man, as women are here the reference level) of our participants with all the variables of the dataframe.</p>
+
+<pre><code class="language-r"># devtools::install_github(&quot;neuropsychology/psycho.R&quot;)  # Install the latest psycho version if needed
+
+# Load packages
+library(tidyverse)
+library(caret)
+library(psycho)
+
+# Import data
+df &lt;- psycho::affective %&gt;% 
+  standardize() %&gt;%  # Standardize
+  na.omit(df)  # Remove missing values
+
+# Fit the model
+model &lt;- caret::train(Sex ~ .,
+                      data=df,
+                      method = &quot;nnet&quot;)
+</code></pre>
+
+<pre><code class="language-r">varImp(model, scale = TRUE)
+</code></pre>
+
+<pre><code>## nnet variable importance
+## 
+##                    Overall
+## Salary2000+        100.000
+## Concealing          48.761
+## Adjusting           46.198
+## Birth_SeasonSpring  39.289
+## Life_Satisfaction   22.567
+## Salary&lt;2000          9.176
+## Birth_SeasonSummer   8.863
+## Birth_SeasonWinter   6.624
+## Tolerating           5.686
+## Age                  0.000
+</code></pre>
+
+<p>It seems that the upper salary category (<em>&gt; 2000€ / month</em>) is the most important variable of the model, followed by the concealing and adjusting personality traits. Interesting, but what does it say about the actual relationship between those variables and our outcome?</p>
+
+<h1 id="simple">Simple</h1>
+
+<p>To visualize the effect of Salary, we can extract a reference data with all the salary levels and all other variables fixed at their mean level.</p>
+
+<pre><code class="language-r">newdata &lt;- df %&gt;% 
+  select(-Sex) %&gt;%  # We remove the  sex as it is our variable &quot;to predict&quot;
+  refdata(&quot;Salary&quot;)
+newdata
+</code></pre>
+
+<pre><code class="language-r">knitr::kable(newdata, digits=2)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">Salary</th>
+<th align="right">Age</th>
+<th align="left">Birth_Season</th>
+<th align="right">Life_Satisfaction</th>
+<th align="right">Concealing</th>
+<th align="right">Adjusting</th>
+<th align="right">Tolerating</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">&lt;1000</td>
+<td align="right">0.11</td>
+<td align="left">Fall</td>
+<td align="right">-0.01</td>
+<td align="right">0</td>
+<td align="right">0.03</td>
+<td align="right">-0.02</td>
+</tr>
+
+<tr>
+<td align="left">&lt;2000</td>
+<td align="right">0.11</td>
+<td align="left">Fall</td>
+<td align="right">-0.01</td>
+<td align="right">0</td>
+<td align="right">0.03</td>
+<td align="right">-0.02</td>
+</tr>
+
+<tr>
+<td align="left">2000+</td>
+<td align="right">0.11</td>
+<td align="left">Fall</td>
+<td align="right">-0.01</td>
+<td align="right">0</td>
+<td align="right">0.03</td>
+<td align="right">-0.02</td>
+</tr>
+</tbody>
+</table>
+
+<p>We can make predictions from the model on this minimal dataset and visualize it.</p>
+
+<pre><code class="language-r">predicted &lt;- predict(model, newdata, type = &quot;prob&quot;)
+newdata &lt;- cbind(newdata, predicted)
+
+newdata %&gt;% 
+  ggplot(aes(x=Salary, y=M, group=1)) +
+  geom_line() +
+  theme_classic() +
+  ylab(&quot;Probability of being a man&quot;)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-06-25-refdata_files/figure-markdown_github/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /></p>
+
+<p>Well, it seems that males are more represented in categories with lower and uppper salary classes (that least, that&rsquo;s what the model learnt).</p>
+
+<h1 id="multiple-targets">Multiple Targets</h1>
+
+<p>How does this interact with the concealing personality trait?</p>
+
+<pre><code class="language-r">newdata &lt;- df %&gt;% 
+  select(-Sex) %&gt;% 
+  refdata(c(&quot;Salary&quot;, &quot;Concealing&quot;))  # We can sepcify multiple targets
+newdata
+</code></pre>
+
+<pre><code class="language-r">knitr::kable(head(newdata, 5), digits=2)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">Salary</th>
+<th align="right">Concealing</th>
+<th align="right">Age</th>
+<th align="left">Birth_Season</th>
+<th align="right">Life_Satisfaction</th>
+<th align="right">Adjusting</th>
+<th align="right">Tolerating</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">&lt;1000</td>
+<td align="right">-2.52</td>
+<td align="right">0.11</td>
+<td align="left">Fall</td>
+<td align="right">-0.01</td>
+<td align="right">0.03</td>
+<td align="right">-0.02</td>
+</tr>
+
+<tr>
+<td align="left">&lt;2000</td>
+<td align="right">-2.52</td>
+<td align="right">0.11</td>
+<td align="left">Fall</td>
+<td align="right">-0.01</td>
+<td align="right">0.03</td>
+<td align="right">-0.02</td>
+</tr>
+
+<tr>
+<td align="left">2000+</td>
+<td align="right">-2.52</td>
+<td align="right">0.11</td>
+<td align="left">Fall</td>
+<td align="right">-0.01</td>
+<td align="right">0.03</td>
+<td align="right">-0.02</td>
+</tr>
+
+<tr>
+<td align="left">&lt;1000</td>
+<td align="right">-1.99</td>
+<td align="right">0.11</td>
+<td align="left">Fall</td>
+<td align="right">-0.01</td>
+<td align="right">0.03</td>
+<td align="right">-0.02</td>
+</tr>
+
+<tr>
+<td align="left">&lt;2000</td>
+<td align="right">-1.99</td>
+<td align="right">0.11</td>
+<td align="left">Fall</td>
+<td align="right">-0.01</td>
+<td align="right">0.03</td>
+<td align="right">-0.02</td>
+</tr>
+</tbody>
+</table>
+
+<p>This created 10 evenly spread values of Concealing (from min to max) and &ldquo;merged&rdquo; them with all the levels of Salary.</p>
+
+<pre><code class="language-r">predicted &lt;- predict(model, newdata, type = &quot;prob&quot;)
+newdata &lt;- cbind(newdata, predicted)
+
+newdata %&gt;% 
+  ggplot(aes(x=Concealing, y=M, colour=Salary)) +
+  geom_line() +
+  theme_classic() +
+  ylab(&quot;Probability of being a man&quot;)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-06-25-refdata_files/figure-markdown_github/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /></p>
+
+<p>This plot is rather ugly&hellip;</p>
+
+<h1 id="increase-length">Increase Length</h1>
+
+<pre><code class="language-r">newdata &lt;- df %&gt;% 
+  select(-Sex) %&gt;% 
+  refdata(c(&quot;Salary&quot;, &quot;Concealing&quot;), length.out=500)  # Set the length by which to spread numeric targets
+
+predicted &lt;- predict(model, newdata, type = &quot;prob&quot;)
+newdata &lt;- cbind(newdata, predicted)
+
+newdata %&gt;% 
+  ggplot(aes(x=Concealing, y=M, colour=Salary)) +
+  geom_line(size=1) +
+  theme_classic() +
+  ylab(&quot;Probability of being a man&quot;)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-06-25-refdata_files/figure-markdown_github/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /></p>
+
+<p>It seems that for richer people, the concealing treshold for increasing the probability of being a male is lower.</p>
+
+<h1 id="how-to-fix-maintain-numeric-variables">How to Fix (Maintain) Numeric Variables?</h1>
+
+<p>For now, all other variables were fixed to their mean level. But maybe their behaviour would be different when other variables are low or high.</p>
+
+<pre><code class="language-r">newdata_min &lt;- df %&gt;% 
+  select(-Sex) %&gt;% 
+  refdata(c(&quot;Salary&quot;, &quot;Concealing&quot;), length.out=500, numerics = &quot;min&quot;) %&gt;%  # Set the other numeric variables to their minimum 
+  mutate(Fixed = &quot;Minimum&quot;)
+newdata_max &lt;- df %&gt;% 
+  select(-Sex) %&gt;% 
+  refdata(c(&quot;Salary&quot;, &quot;Concealing&quot;), length.out=500, numerics = &quot;max&quot;)%&gt;%  # Set the other numeric variables to their maximum 
+  mutate(Fixed = &quot;Maximum&quot;)
+newdata &lt;- rbind(newdata_min, newdata_max)
+
+predicted &lt;- predict(model, newdata, type = &quot;prob&quot;)
+newdata &lt;- cbind(newdata, predicted)
+
+newdata %&gt;% 
+  ggplot(aes(x=Concealing, y=M, colour=Salary)) +
+  geom_line(size=1) +
+  theme_classic() +
+  ylab(&quot;Probability of being a man&quot;) +
+  facet_wrap(~Fixed)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-06-25-refdata_files/figure-markdown_github/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /></p>
+
+<p>When all variables are high, concealing is not related to the sex for richer people. When the variables are set to their minimum, the concealing treshold for the two lower salary classes is higher (around 1.5).</p>
+
+<h1 id="chains-of-refdata">Chains of refdata</h1>
+
+<p>Let&rsquo;s say we want one target of length 500 and another to length 10 To do it, we can nicely chain <code>refdata</code>.</p>
+
+<pre><code class="language-r">newdata &lt;- df %&gt;% 
+  select(-Sex) %&gt;% 
+  refdata(c(&quot;Adjusting&quot;, &quot;Concealing&quot;), length.out=500) %&gt;% 
+  refdata(&quot;Adjusting&quot;, length.out=10, numerics = &quot;combination&quot;)
+
+predicted &lt;- predict(model, newdata, type = &quot;prob&quot;)
+newdata &lt;- cbind(newdata, predicted)
+
+newdata %&gt;% 
+  mutate(Adjusting=as.factor(round(Adjusting, 2))) %&gt;% 
+  ggplot(aes(x=Concealing, y=M, alpha=Adjusting)) +
+  geom_line(size=1) +
+  theme_classic() +
+  ylab(&quot;Probability of being a man&quot;)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-06-25-refdata_files/figure-markdown_github/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /></p>
+
+<p>The concealing treshold highly depends on adjusting. The more adjusting is high (dark lines), the less concealing is needed to increase the probability of being a man.</p>
+
+<h1 id="combinations-of-observed-values">Combinations of Observed Values</h1>
+
+<p>Let&rsquo;s observe the link with Adjusting by generating a reference grid with all combinations of factors (salary, birth month etc.), and fixing numerics to their median (we could also chose &ldquo;combinations&rdquo; but it would generate a very, very very big dataframe with all possible combinations of values).</p>
+
+<pre><code class="language-r">newdata &lt;- df %&gt;% 
+  select(-Sex) %&gt;% 
+  refdata(&quot;Adjusting&quot;, length.out=10, factors = &quot;combination&quot;, numerics = &quot;median&quot;) 
+ 
+predicted &lt;- predict(model, newdata, type = &quot;prob&quot;)
+newdata &lt;- cbind(newdata, predicted)
+
+newdata %&gt;% 
+  ggplot(aes(x=Adjusting, y=M)) +
+  geom_jitter(size=1, width=0, height = 0.01) +
+  geom_smooth(size=1, se=FALSE) +
+  theme_classic() +
+  ylab(&quot;Probability of being a man&quot;)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-06-25-refdata_files/figure-markdown_github/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /></p>
+
+<p>The more adjusting is high, the more probability there is to be a man. <strong>But let&rsquo;s generate now much more observations</strong>.</p>
+
+<pre><code class="language-r">newdata &lt;- df %&gt;% 
+  select(-Sex) %&gt;% 
+  refdata(&quot;Adjusting&quot;, length.out=10000, factors = &quot;combination&quot;, numerics = &quot;median&quot;) 
+ 
+predicted &lt;- predict(model, newdata, type = &quot;prob&quot;)
+newdata &lt;- cbind(newdata, predicted)
+
+newdata %&gt;% 
+  ggplot(aes(x=Adjusting, y=M)) +
+  geom_jitter(size=1, width=0, height = 0.01, alpha=0.2) +
+  geom_smooth(size=1, se=FALSE) +
+  theme_classic() +
+  ylab(&quot;Probability of being a man&quot;)
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/neuropsychology/psycho.R/master/docs/_posts/2018-06-25-refdata_files/figure-markdown_github/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /></p>
+
+<p>We can still see, &ldquo;behind the scenes&rdquo;, how different factors influence this relationship.</p>
+
+<h1 id="credits">Credits</h1>
+
+<p>This package helped you? Don&rsquo;t forget to cite the various packages you used :)</p>
+
+<p>You can cite <code>psycho</code> as follows:</p>
+
+<ul>
+<li>Makowski, (2018). <em>The psycho Package: An Efficient and Publishing-Oriented Workflow for Psychological Science</em>. Journal of Open Source Software, 3(22), 470. <a href="https://doi.org/10.21105/joss.00470">https://doi.org/10.21105/joss.00470</a></li>
+</ul>
+
+<h1 id="contribute">Contribute</h1>
+
+<p><strong>psycho</strong> is a young package and still need some love. Therefore, if you have any advices, opinions or such, we encourage you to either let us know by opening an <a href="https://github.com/neuropsychology/psycho.R/issues">issue</a>, or even better, try to implement them yourself by <a href="https://github.com/neuropsychology/psycho.R/blob/master/.github/CONTRIBUTING.md">contributing</a> to the code.</p>
+
+<h1 id="previous-blogposts">Previous blogposts</h1>
+
+<ul>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">Copy/paste t-tests Directly to Manuscripts</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">APA Formatted Bayesian Correlation</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/03/plot_bayesian_model.html">Fancy Plot (with Posterior Samples) for Bayesian Regressions</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/24/n_factors.html">How Many Factors to Retain in Factor Analysis</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html">Beautiful and Powerful Correlation Tables</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/10/interpret_mixed_models.html">Format and Interpret Linear Mixed Models</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">How to do Repeated Measures ANOVAs</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/standardize.html">Standardize (Z-score) a dataframe</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/SDT.html">Compute Signal Detection Theory Indices</a></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+		<li>
+            <a href="https://dominiquemakowski.github.io/" type="footer-links-kudos" target="_blank">© Dominique Makowski</a>
+          </li>
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+  </body>
+</html>
+

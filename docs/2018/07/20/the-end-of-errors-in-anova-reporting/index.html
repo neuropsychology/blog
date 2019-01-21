@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.53" />
+
+
+<title>The end of errors in ANOVA reporting - Neuropsychology Blog</title>
+<meta property="og:title" content="The end of errors in ANOVA reporting - Neuropsychology Blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo/logo.PNG"
+         width="1198"
+         height="1198"
+         alt="Neuropsychology Blog">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/neuropsychology/blog">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Dom_Makowski">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">4 min read</span>
+    
+
+    <h1 class="article-title">The end of errors in ANOVA reporting</h1>
+
+    
+    <span class="article-date">2018/07/20</span>
+    
+
+    <div class="article-content">
+      
+
+<ul>
+<li><a href="#fit-an-anova">Fit an anova</a></li>
+<li><a href="#apa-formatted-output">APA formatted output</a></li>
+<li><a href="#correlations-t-tests-regressions...">Correlations, t-tests, regressions&hellip;</a></li>
+<li><a href="#evolution">Evolution</a></li>
+<li><a href="#credits">Credits</a></li>
+<li><a href="#on-similar-topics">On similar topics</a></li>
+</ul>
+
+<p><strong>Psychology is still (<a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">unfortunately</a>) massively using analysis of variance (ANOVA)</strong>. Despite its relative simplicity, I am very often confronted to <strong>errors in its reporting</strong>, for instance in student&rsquo;s theses or manuscripts. Beyond the incomplete, uncomprehensible or just wrong reporting, one can find a tremendous amount of genuine errors (that could influence the results and their intepretation), even in published papers! (See the excellent <a href="http://statcheck.io/">statcheck</a> to quickly check the stats of a paper). This error proneness can be at least partially explained by the fact that copy/pasting the (appropriate) values of any statistical software and formatting them textually is a very annoying process.</p>
+
+<p><strong>How to end it?</strong></p>
+
+<p>We believe that this could be solved (at least, partially) by the <strong>default implementation of current best practices of statistical reporting</strong>. A tool that automatically transforms a statistical result into a copy/pastable text. Of course, this automation cannot be suitable for each and every advanced usage, but would probably be satisfying for a substantial proportion of use cases. <strong>Implementing this unified, end-user oriented pipeline is the goal of the <a href="https://github.com/neuropsychology/psycho.R">psycho</a> package.</strong></p>
+
+<h1 id="fit-an-anova">Fit an anova</h1>
+
+<p>Let&rsquo;s start by doing a traditional ANOVA with <em>adjusting</em> (the ability to flexibly regulate one&rsquo;s emotions) as dependent variable, and <em>sex</em> and <em>salary</em> as categorical predictors.</p>
+
+<pre><code class="language-r"># devtools::install_github(&quot;neuropsychology/psycho.R&quot;)  # Install the latest psycho version
+library(psycho)
+
+df &lt;- psycho::affective  # load a dataset available in the psycho package
+
+aov_results &lt;- aov(Adjusting ~ Sex * Salary, data=df)  # Fit the ANOVA
+summary(aov_results)  # Inspect the results
+</code></pre>
+
+<pre><code>             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+Sex           1   35.9   35.94  18.162 2.25e-05 ***
+Salary        2    9.4    4.70   2.376   0.0936 .  
+Sex:Salary    2    3.0    1.51   0.761   0.4674    
+Residuals   859 1699.9    1.98                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+386 observations deleted due to missingness
+</code></pre>
+
+<h1 id="apa-formatted-output">APA formatted output</h1>
+
+<p>The <code>psycho</code> package include a simple function, <code>analyze()</code> that can be applied to an ANOVA object to format its content.</p>
+
+<pre><code class="language-r">analyze(aov_results)
+</code></pre>
+
+<pre><code>   - The effect of Sex is significant (F(1, 859) = 18.16, p &lt; .001) and can be considered as small (Partial Omega-squared = 0.019).
+   - The effect of Salary is not significant (F(2, 859) = 2.38, p = 0.09°) and can be considered as very small (Partial Omega-squared = 0.0032).
+   - The interaction between Sex and Salary is not significant (F(2, 859) = 0.76, p &gt; .1) and can be considered as very small (Partial Omega-squared = 0).
+</code></pre>
+
+<p>It formats the results, computes the partial omega-squared as an index of effect size (better than the eta2, see <a href="https://academic.oup.com/hcr/article-abstract/28/4/612/4331349">Levine et al. 2002</a>, <a href="http://journals.sagepub.com/doi/abs/10.1177/0013164404264848">Pierce et al. 2004</a>) as well as its <a href="http://imaging.mrc-cbu.cam.ac.uk/statswiki/FAQ/effectSize">interpretation</a> and presents the results in a APA-compatible way.</p>
+
+<h1 id="correlations-t-tests-regressions">Correlations, t-tests, regressions&hellip;</h1>
+
+<p>Note that the <code>analyze()</code> method also exists for other statistical procudures, such as <a href="https://neuropsychology.github.io/psycho.R/2018/06/28/analyze_correlation.html">correlations</a>, <a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">t-tests</a> and <a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">regressions</a>.</p>
+
+<h1 id="evolution">Evolution</h1>
+
+<p>Of course, these reporting standards should change, depending on new expert recommandations or official guidelines. <strong>The goal of this package is to flexibly adaptive to new changes and good practices evolution</strong>. Therefore, if you have any advices, opinions or such, we encourage you to either let us know by opening an <a href="https://github.com/neuropsychology/psycho.R/issues">issue</a>, or even better, try to implement them yourself by <a href="https://github.com/neuropsychology/psycho.R/blob/master/.github/CONTRIBUTING.md">contributing</a> to the code.</p>
+
+<h1 id="credits">Credits</h1>
+
+<p>This package helped you? Don&rsquo;t forget to cite the various packages you used :)</p>
+
+<p>You can cite <code>psycho</code> as follows:</p>
+
+<ul>
+<li>Makowski, (2018). <em>The psycho Package: An Efficient and Publishing-Oriented Workflow for Psychological Science</em>. Journal of Open Source Software, 3(22), 470. <a href="https://doi.org/10.21105/joss.00470">https://doi.org/10.21105/joss.00470</a></li>
+</ul>
+
+<h1 id="on-similar-topics">On similar topics</h1>
+
+<ul>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/07/14/standardize_grouped_df.html">Variable vs. Participant-wise Standardization</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/28/analyze_correlation.html">Formatted Correlation with Effect Size</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/25/refdata.html">Extracting a Reference Grid of your Data for Machine Learning Models Visualization</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/19/analyze_ttest.html">Copy/paste t-tests Directly to Manuscripts</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/11/bayesian_correlation.html">Easy APA Formatted Bayesian Correlation</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/06/03/plot_bayesian_model.html">Fancy Plot (with Posterior Samples) for Bayesian Regressions</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/24/n_factors.html">How Many Factors to Retain in Factor Analysis</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/20/correlation.html">Beautiful and Powerful Correlation Tables</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/10/interpret_mixed_models.html">Format and Interpret Linear Mixed Models</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/05/01/repeated_measure_anovas.html">How to do Repeated Measures ANOVAs</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/standardize.html">Standardize (Z-score) a dataframe</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/29/SDT.html">Compute Signal Detection Theory Indices</a></li>
+<li><a href="https://neuropsychology.github.io/psycho.R/2018/03/21/installingR.html">Installing R, R Studio and psycho</a></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+		<li>
+            <a href="https://dominiquemakowski.github.io/" type="footer-links-kudos" target="_blank">© Dominique Makowski</a>
+          </li>
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+  </body>
+</html>
+
